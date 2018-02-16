@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dnlib", "..\..\Libraries\dn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreQuickSlots", "MoreQuickSlots\MoreQuickSlots.csproj", "{EC33236C-BBA1-40B7-B583-AC8C2D5AE4F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImprovedSaves", "ImprovedSaves\ImprovedSaves.csproj", "{C35F0660-F43F-45A5-B9DE-2B944B5A8524}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssemblyPatcher", "..\..\AssemblyPatcher\AssemblyPatcher.csproj", "{9A88B43E-E5C1-40C3-8F03-A501A9E392B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{EC33236C-BBA1-40B7-B583-AC8C2D5AE4F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC33236C-BBA1-40B7-B583-AC8C2D5AE4F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC33236C-BBA1-40B7-B583-AC8C2D5AE4F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C35F0660-F43F-45A5-B9DE-2B944B5A8524}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C35F0660-F43F-45A5-B9DE-2B944B5A8524}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C35F0660-F43F-45A5-B9DE-2B944B5A8524}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C35F0660-F43F-45A5-B9DE-2B944B5A8524}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A88B43E-E5C1-40C3-8F03-A501A9E392B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A88B43E-E5C1-40C3-8F03-A501A9E392B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A88B43E-E5C1-40C3-8F03-A501A9E392B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A88B43E-E5C1-40C3-8F03-A501A9E392B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
