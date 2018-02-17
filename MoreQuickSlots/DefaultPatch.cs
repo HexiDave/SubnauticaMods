@@ -10,11 +10,12 @@ namespace MoreQuickSlots
     class DefaultPatch : BootstrapLib.IPatch
     {
         // Currently there are 5 slots
-        static int TopExistingSlot = 5;
+        private const int TopExistingSlot = 5;
 
         // Change this to add a certain number of slots
-        static int QuickSlotsToAdd = 5;
-        static string[] DefaultKeysForSlots =
+        private const int QuickSlotsToAdd = 5;
+
+        private static readonly string[] DefaultKeysForSlots =
         {
             "6",
             "7",
@@ -35,17 +36,19 @@ namespace MoreQuickSlots
             // GameInput -> Button
             var gameInputType = module.Find("GameInput", false);
             var gameInputButtonType = module.Find("GameInput/Button", false);
-            var maxButtonValue = gameInputButtonType.Fields.Where(f => f.Constant != null).Max(f => (int)f.Constant.Value);
+            var maxButtonValue = gameInputButtonType.Fields.Where(f => f.Constant != null)
+                .Max(f => (int) f.Constant.Value);
             var buttonTypeSig = gameInputButtonType.GetEnumUnderlyingType();
 
             // QuickSlots
             var quickSlotStaticConstructor = module.Find("QuickSlots", false).FindStaticConstructor();
 
-            var totalQuickSlots = TopExistingSlot + QuickSlotsToAdd;
+            const int totalQuickSlots = TopExistingSlot + QuickSlotsToAdd;
             var quickSlotInstructions = quickSlotStaticConstructor.Body.Instructions;
 
             // Update the array size instruction
-            quickSlotInstructions[0] = OpCodes.Ldc_I4.ToInstruction(totalQuickSlots + 1); // Add one due to a hitch in Subnautica's code
+            quickSlotInstructions[0] =
+                OpCodes.Ldc_I4.ToInstruction(totalQuickSlots + 1); // Add one due to a hitch in Subnautica's code
 
             // Finally, set up the default keyboard shortcuts
             var defaultKeyboardBindingsMethod = gameInputType.FindMethod("SetupDefaultKeyboardBindings");
@@ -55,22 +58,23 @@ namespace MoreQuickSlots
 
             for (var i = 0; i < QuickSlotsToAdd; i++)
             {
-                int nextSlotIndex = TopExistingSlot + i + 1;
-                string slotName = string.Format("Slot{0}", nextSlotIndex);
-                string quickSlotName = string.Format("QuickSlot{0}", nextSlotIndex);
-                int nextSlotValue = maxButtonValue + i + 1;
+                var nextSlotIndex = TopExistingSlot + i + 1;
+                var slotName = $"Slot{nextSlotIndex}";
+                var quickSlotName = $"QuickSlot{nextSlotIndex}";
+                var nextSlotValue = maxButtonValue + i + 1;
 
                 // Add the Button enum value
                 FieldDef fieldToAdd = new FieldDefUser(slotName, new FieldSig(new ValueTypeSig(gameInputButtonType)))
                 {
                     Constant = module.UpdateRowId(new ConstantUser(nextSlotValue, buttonTypeSig.ElementType)),
-                    Attributes = FieldAttributes.Literal | FieldAttributes.Static | FieldAttributes.HasDefault | FieldAttributes.Public
+                    Attributes = FieldAttributes.Literal | FieldAttributes.Static | FieldAttributes.HasDefault |
+                                 FieldAttributes.Public
                 };
 
                 gameInputButtonType.Fields.Add(fieldToAdd);
 
                 // Add the QuickSlot name
-                int insertPoint = quickSlotInstructions.Count - 2; // Ignore Stsfld and ret
+                var insertPoint = quickSlotInstructions.Count - 2; // Ignore Stsfld and ret
 
                 // dup
                 // ldc.i4.s <nextSlotIndex>
@@ -137,11 +141,10 @@ namespace MoreQuickSlots
             // Insert new instructions
             for (var i = 0; i < totalQuickSlots; i++)
             {
-                string slotName = string.Format("Slot{0}", i + 1);
+                var slotName = $"Slot{i + 1}";
                 var slotField = buttonTypeFields
-                    .Where(x => x.Name == slotName)
-                    .First();
-                var slotValue = (int)slotField.Constant.Value;
+                    .First(x => x.Name == slotName);
+                var slotValue = (int) slotField.Constant.Value;
 
                 instructions.Add(OpCodes.Ldc_I4.ToInstruction(i));
                 instructions.Add(OpCodes.Ldc_I4.ToInstruction(slotValue));
@@ -171,9 +174,10 @@ namespace MoreQuickSlots
 
             // TODO: Refactor this with something in PatchHelper
             var instructionIndex = inventoryInstructions
-                .Select((instruction, index) => new { instruction, index })
-                .Where(x => x.instruction.OpCode == OpCodes.Ldfld && (x.instruction.Operand as IMemberRef).Name == "rightHandSlot")
-                .First().index + 1; // We want the value after this one
+                                       .Select((instruction, index) => new {instruction, index})
+                                       .First(x => x.instruction.OpCode == OpCodes.Ldfld &&
+                                                   (x.instruction.Operand as IMemberRef).Name == "rightHandSlot")
+                                       .index + 1; // We want the value after this one
 
             inventoryInstructions[instructionIndex] = OpCodes.Ldc_I4.ToInstruction(totalQuickSlots);
         }

@@ -1,42 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using BootstrapLib;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-using BootstrapLib;
 
 namespace PullFromContainers
 {
     class DefaultPatch : IPatch
     {
-        IMethod CrafterLogic_IsCraftRecipeFulfilled_Patch;
-        MethodDef CrafterLogic_IsCraftRecipeFulfilled_Original;
+        private IMethod _constructableConstructPatch;
+        private MethodDef _crafterLogicConsumeResourcesOriginal;
 
-        IMethod CrafterLogic_ConsumeResources_Patch;
-        MethodDef CrafterLogic_ConsumeResources_Original;
+        private IMethod _crafterLogicConsumeResourcesPatch;
+        private MethodDef _crafterLogicIsCraftRecipeFulfilledOriginal;
+        private IMethod _crafterLogicIsCraftRecipeFulfilledPatch;
+        private MethodDef _tooltipFactoryWriteIngredientsOriginal;
 
-        IMethod Constructable_Construct_Patch;
-
-        IMethod TooltipFactory_WriteIngredients_Patch;
-        MethodDef TooltipFactory_WriteIngredients_Original;
+        private IMethod _tooltipFactoryWriteIngredientsPatch;
 
         public void InitializePatch(ModuleDefMD module)
         {
-            Importer importer = new Importer(module);
+            var importer = new Importer(module);
 
             // Import and store the patching methods
-            CrafterLogic_IsCraftRecipeFulfilled_Patch = importer.Import(typeof(CrafterLogicHelper).GetMethod("IsCraftRecipeFulfilled"));
-            CrafterLogic_ConsumeResources_Patch = importer.Import(typeof(CrafterLogicHelper).GetMethod("ConsumeResources"));
-            Constructable_Construct_Patch = importer.Import(typeof(ConstructableHelper).GetMethod("Construct"));
-            TooltipFactory_WriteIngredients_Patch = importer.Import(typeof(CrafterLogicHelper).GetMethod("WriteIngredients"));
+            _crafterLogicIsCraftRecipeFulfilledPatch =
+                importer.Import(typeof(CrafterLogicHelper).GetMethod("IsCraftRecipeFulfilled"));
+            _crafterLogicConsumeResourcesPatch =
+                importer.Import(typeof(CrafterLogicHelper).GetMethod("ConsumeResources"));
+            _constructableConstructPatch = importer.Import(typeof(ConstructableHelper).GetMethod("Construct"));
+            _tooltipFactoryWriteIngredientsPatch =
+                importer.Import(typeof(CrafterLogicHelper).GetMethod("WriteIngredients"));
 
             // CrafterLogic
             var originalCrafterLogic = module.Find("CrafterLogic", false);
 
             // Get the original methods we're going to replace
-            CrafterLogic_IsCraftRecipeFulfilled_Original = originalCrafterLogic.FindMethod("IsCraftRecipeFulfilled");
-            CrafterLogic_ConsumeResources_Original = originalCrafterLogic.FindMethod("ConsumeResources");
+            _crafterLogicIsCraftRecipeFulfilledOriginal = originalCrafterLogic.FindMethod("IsCraftRecipeFulfilled");
+            _crafterLogicConsumeResourcesOriginal = originalCrafterLogic.FindMethod("ConsumeResources");
 
             // Patch CrafterLogic
             Patch_CrafterLogic_IsCraftRecipeFulfilled(module);
@@ -46,16 +44,17 @@ namespace PullFromContainers
 
             // Patch the tooltip
             var originalTooltipFactory = module.Find("TooltipFactory", false);
-            TooltipFactory_WriteIngredients_Original = originalTooltipFactory.FindMethod("WriteIngredients");
+            _tooltipFactoryWriteIngredientsOriginal = originalTooltipFactory.FindMethod("WriteIngredients");
 
             Patch_Tooltip_WriteIngredients(module, originalTooltipFactory);
         }
 
-        void Patch_CrafterLogic_IsCraftRecipeFulfilled(ModuleDef module)
+        private void Patch_CrafterLogic_IsCraftRecipeFulfilled(ModuleDef module)
         {
             var parentMethod = module.Find("uGUI_CraftingMenu", false).FindMethod("ActionAvailable");
 
-            PatchHelper.ReplaceCall(parentMethod, CrafterLogic_IsCraftRecipeFulfilled_Original, CrafterLogic_IsCraftRecipeFulfilled_Patch);
+            PatchHelper.ReplaceCall(parentMethod, _crafterLogicIsCraftRecipeFulfilledOriginal,
+                _crafterLogicIsCraftRecipeFulfilledPatch);
 
             // Continue the patch chain
             var parentMethods = new[]
@@ -66,12 +65,11 @@ namespace PullFromContainers
             };
 
             foreach (var method in parentMethods)
-            {
-                PatchHelper.ReplaceCall(method, CrafterLogic_ConsumeResources_Original, CrafterLogic_ConsumeResources_Patch);
-            }
+                PatchHelper.ReplaceCall(method, _crafterLogicConsumeResourcesOriginal,
+                    _crafterLogicConsumeResourcesPatch);
         }
 
-        void Patch_Constructable_Construct(ModuleDef module)
+        private void Patch_Constructable_Construct(ModuleDef module)
         {
             var parentMethod = module.Find("Constructable", false).FindMethod("Construct");
 
@@ -82,11 +80,11 @@ namespace PullFromContainers
             var instructions = parentMethod.Body.Instructions;
 
             instructions.Add(OpCodes.Ldarg_0.ToInstruction());
-            instructions.Add(OpCodes.Call.ToInstruction(Constructable_Construct_Patch));
+            instructions.Add(OpCodes.Call.ToInstruction(_constructableConstructPatch));
             instructions.Add(OpCodes.Ret.ToInstruction());
         }
 
-        void Patch_Tooltip_WriteIngredients(ModuleDef module, TypeDef parentType)
+        private void Patch_Tooltip_WriteIngredients(ModuleDef module, TypeDef parentType)
         {
             var parentMethods = new[]
             {
@@ -95,9 +93,8 @@ namespace PullFromContainers
             };
 
             foreach (var method in parentMethods)
-            {
-                PatchHelper.ReplaceCall(method, TooltipFactory_WriteIngredients_Original, TooltipFactory_WriteIngredients_Patch);
-            }
+                PatchHelper.ReplaceCall(method, _tooltipFactoryWriteIngredientsOriginal,
+                    _tooltipFactoryWriteIngredientsPatch);
         }
     }
 }

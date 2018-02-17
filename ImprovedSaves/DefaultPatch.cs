@@ -12,7 +12,7 @@ namespace ImprovedSaves
     {
         public void InitializePatch(ModuleDefMD module)
         {
-            Importer importer = new Importer(module);
+            var importer = new Importer(module);
 
             // Import and store the patching methods
             var performSaveMethod = importer.Import(typeof(SaveHelper).GetMethod("PerformSave"));

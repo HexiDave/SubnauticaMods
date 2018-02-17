@@ -7,11 +7,10 @@ namespace ImprovedSaves
 {
     public static class SaveHelper
     {
-        static readonly float AutosaveTime = 5f * 60f;
+        private const float AutosaveTime = 5f * 60f;
+
         public static void PerformSave()
         {
-            ErrorMessage.AddMessage("Saving...");
-
             if (IngameMenu.main.gameObject.activeSelf)
             {
                 ErrorMessage.AddMessage("Unable to autosave - menu was open.");
@@ -25,7 +24,6 @@ namespace ImprovedSaves
         public static void StartSaveInvoker(Player player)
         {
             player.InvokeRepeating("Autosave", AutosaveTime, AutosaveTime);
-            ErrorMessage.AddMessage("Started invoker");
         }
     }
 }
