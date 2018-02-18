@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DefaultPatch.cs" />
+    <Compile Include="NuclearUpgradeHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PowerIndicatorHelper.cs" />
   </ItemGroup>
