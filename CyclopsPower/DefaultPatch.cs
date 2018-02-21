@@ -87,9 +87,9 @@ namespace CyclopsPower
             var subRootType = module.Find("SubRoot", false);
 
             var fieldToAdd = new FieldDefUser("nuclearUpgrade",
-                new FieldSig(new ValueTypeSig(module.CorLibTypes.Int32.TypeDefOrRef)))
+                new FieldSig(module.CorLibTypes.Int32))
             {
-                Attributes = FieldAttributes.Public
+                Attributes = FieldAttributes.Public | FieldAttributes.NotSerialized
             };
 
             subRootType.Fields.Add(fieldToAdd);
@@ -111,9 +111,6 @@ namespace CyclopsPower
 
         private void PatchNuclearUpgrade_SubRoot_Update(ModuleDefMD module, TypeDef subRootType, Importer importer)
         {
-            subRootType.FindField("slotNames").Attributes = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.InitOnly;
-            //subRootType.FindField("live").Attributes = FieldAttributes.Public;
-
             var updateMethod = subRootType.FindMethod("Update");
 
             var updateNuclearRechargePatchMethod = importer.Import(typeof(NuclearUpgradeHelper).GetMethod("UpdateNuclearRecharge"));

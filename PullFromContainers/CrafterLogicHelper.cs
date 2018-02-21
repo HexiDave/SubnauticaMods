@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace PullFromContainers
 {
@@ -27,21 +28,22 @@ namespace PullFromContainers
                 // Let Unity to the initial leg-work
                 var allStorageContainers = UnityEngine.Object.FindObjectsOfType<StorageContainer>();
 
-                var list = new List<ItemsContainer>();
-                foreach (StorageContainer storageContainer in allStorageContainers)
-                {
-                    // Check that it has a real container and is near enough to the player
-                    if (storageContainer.container != null && (Player.main.transform.position - storageContainer.transform.position).sqrMagnitude < MaxDistanceSq)
+                var containersList = allStorageContainers
+                    .Where(x => x.container != null && !x.name.StartsWith("Aquarium")) // Ignore the poor fishies!
+                    .Select(x => new
                     {
-                        list.Add(storageContainer.container);
-                    }
-                }
+                        Container = x.container,
+                        Distance = (Player.main.transform.position - x.transform.position).sqrMagnitude
+                    })
+                    .Where(x => x.Distance < MaxDistanceSq)
+                    .OrderBy(x => x.Distance)
+                    .Select(x => x.Container)
+                    .ToList();
 
-                // Add the player's inventory container
-                list.Add(Inventory.main.container);
+                containersList.Insert(0, Inventory.main.container);
 
                 // Convert it to prevent List changes
-                nearbyItemContainers = list.ToArray();
+                nearbyItemContainers = containersList.ToArray();
 
                 // Timestamp it
                 lastContainerCheckTime = DayNightCycle.main.timePassed;

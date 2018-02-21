@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.CodeDom;
+using System.Collections.Generic;
 using System.Reflection;
 using BootstrapLib;
 using UnityEngine;
@@ -21,7 +23,7 @@ namespace CyclopsPower
             EquipmentTypesField = craftDataType.GetField("equipmentTypes", BindingFlags.Static | BindingFlags.Public);
 
             var subRootType = typeof(SubRoot);
-            SlotNamesField = subRootType.GetField("slotNames", BindingFlags.Static | BindingFlags.Public);
+            SlotNamesField = subRootType.GetField("slotNames", BindingFlags.Static | BindingFlags.NonPublic);
             LiveField = subRootType.GetField("live", BindingFlags.NonPublic | BindingFlags.Instance);
             NuclearUpgradeField =
                 subRootType.GetField("nuclearUpgrade", BindingFlags.Public | BindingFlags.Instance);
@@ -45,7 +47,6 @@ namespace CyclopsPower
 
         public static void SetCyclopsUpgrades(SubRoot subRoot)
         {
-            
             var live = LiveField.GetValue(subRoot) as LiveMixin;
             if (subRoot.upgradeConsole == null || !live.IsAlive()) return;
 
@@ -96,12 +97,13 @@ namespace CyclopsPower
                 subRoot.slotModSFX.Play();
             }
 
-            subRoot.BroadcastMessage("RefreshUpgradeConsoleIcons", refreshArray, SendMessageOptions.RequireReceiver);
+            subRoot.BroadcastMessage("RefreshUpgradeConsoleIcons", refreshArray,
+                SendMessageOptions.RequireReceiver);
         }
 
         public static void UpdateNuclearRecharge(SubRoot subRoot)
         {
-            var nuclearUpgrades = (int)NuclearUpgradeField.GetValue(subRoot);
+            var nuclearUpgrades = (int) NuclearUpgradeField.GetValue(subRoot);
             if (nuclearUpgrades > 0)
             {
                 const float powerPerUpgrade = 1.5f;
